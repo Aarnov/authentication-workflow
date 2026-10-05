@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String              @id @default(uuid())
+  email               String              @unique
+  name                String?
+  googleId            String?             @unique
+  isEmailVerified        Boolean                 @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  passwordCredential  PasswordCredential?
+  otp                 Otp?                
+  totpCredential      TotpCredential?  
+  passwordResetToken  PasswordResetToken?   
+  emailVerificationToken EmailVerificationToken?
+}
+
+model PasswordCredential {
+  id             String   @id @default(uuid())
+  hashedPassword String   
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  code      String   // We will store the hashed version of the 6-digit code
+  expiresAt DateTime // Enforces the 10-minute validity window
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+model TotpCredential {
+  id        String   @id @default(uuid())
+  secret    String   // The Base32 shared cryptographic seed
+  verified  Boolean  @default(false) // Ensures they actually scanned the QR code
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   // We store a hashed version of the token for security
+  expiresAt DateTime // Enforces a 15-minute validity window
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   
+  expiresAt DateTime 
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

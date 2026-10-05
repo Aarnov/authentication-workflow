@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>HTML Smuggling Demo</title>
+</head>
+<body>
+<button onclick="downloadFile()">Download Demo File</button>
+
+<script>
+ function downloadFile() {
+	// Create file content in the browser
+	const content = "This file was generated locally by JavaScript.";
+
+            	// Create a Blob object
+           	 const blob = new Blob([content], { type: "text/plain" });
+
+           	 // Create a temporary URL for the Blob
+           	 const url = URL.createObjectURL(blob);
+ // Create a hidden download link
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "demo1.txt";
+
+            // Trigger the download
+            a.click();
+
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
